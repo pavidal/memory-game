@@ -49,6 +49,11 @@ Creates custom characters
 */
 void makeChar()
 {
+	/*
+		Putting byte arrays here frees up 
+		memory when not in use
+	*/
+
 	byte rightArrow[] = {
 		B00000,				// 
 		B00000,				// 
@@ -110,6 +115,7 @@ void makeChar()
 		B00100
 	};
 
+	// creating characters
 	lcd.createChar(SELECT_ICO, selectChar);
 	lcd.createChar(UP_ICO, upArrow);
 	lcd.createChar(DOWN_ICO, downArrow);
@@ -120,9 +126,24 @@ void makeChar()
 
 /**
 Creates a single 2x2 custom character
+@param [uint8_t] direction - Custom 1x1 char value
 @return null
 */
 void makeLargeChar(uint8_t direction) {
+
+	/*
+		lcd.createChar() has a limit of 7 characters
+		so a "banking system" is needed.
+
+		This takes the value of a 1x1 char and creates
+		4 tiles of its larger version
+
+		It always sets to 0-3, 0 = top left and 
+		3 = bottom right
+
+		As the previous character set is overwritten,
+		makeChar() must be called again.
+	*/
 
 	// common chars
 	byte stalkVL[] = {
@@ -335,6 +356,7 @@ Symbol to Button dictionary
 @return [uint8_t] button
 */
 uint8_t symbolTranslator(uint8_t symbol) {
+	// This is used in startGame()
 	switch (symbol) {
 	case UP_ICO		: return BUTTON_UP;
 	case DOWN_ICO	: return BUTTON_DOWN;
@@ -350,6 +372,7 @@ Button to Symbol dictionary
 @return [uint8_t] Symbol
 */
 uint8_t buttonTranslator() {
+	// This is used in startGame()
 	switch (lcd.readButtons()) {
 	case BUTTON_DOWN	: return DOWN_ICO;
 	case BUTTON_LEFT	: return LEFT_ICO;
@@ -387,6 +410,14 @@ Prints a String array as a two lined message box
 @param [uint8_t] length - Length of the array
 */
 void messageBox(const String lines[], uint8_t length) {
+
+	/*
+		This was created for use with a story line
+		but was never realised due to hardware 
+		restrictions. Therefore, this is only used 
+		for the tutorial messages.
+	*/
+
 	lcd.clear();
 
 	// First print has to be outside
@@ -531,13 +562,31 @@ void tutorial() {
 		F("limit, so be"),
 		F("fast!"),
 
+		F("Press the right"),
+		F("button and the"),
+
+		F("timer will"),
+		F("reset!"),
+
 		F("There are two"),
 		F("modes to play:"),
 
 		F("Story and"),
-		F("Free Play.")
+		F("Free Play."),
+
+		F("Story mode have"),
+		F("you go through"),
+
+		F("levels with inc-"),
+		F("reasing diffic-"),
+
+		F("ulty. Free play"),
+		F("is an infinite"),
+
+		F("practice mode."),
+		F("That's all!")
 	};
-	messageBox(lines, 12);
+	messageBox(lines, 28);
 }
 
 /**
@@ -546,7 +595,7 @@ Menu for selecting freeplay difficulty
 */
 void freePlay() {
 	const String difficulties[] = { F("Easy"), F("Normal"), F("Hard"), F("Big Brain") };
-
+	const String infMode = F("Infinite Mode");
 	lcd.clear();
 
 	randomSeed(analogRead(0));
@@ -556,7 +605,9 @@ void freePlay() {
 
 	switch (menu(F("Difficulty"), difficulties, 4)) {
 	case 0:
-		lcd.print(F("Easy"));
+		lcd.print(difficulties[0]);
+		lcd.setCursor(0, 1);
+		lcd.print(infMode);
 		flashBackLight(GREEN, WHITE, 1000);
 
 		do {
@@ -570,7 +621,9 @@ void freePlay() {
 		break;
 
 	case 1:
-		lcd.print(F("Normal"));
+		lcd.print(difficulties[1]);
+		lcd.setCursor(0, 1);
+		lcd.print(infMode);
 		flashBackLight(YELLOW, WHITE, 1000);
 
 		do {
@@ -580,7 +633,9 @@ void freePlay() {
 		break;
 
 	case 2:
-		lcd.print(F("Hard"));
+		lcd.print(difficulties[2]);
+		lcd.setCursor(0, 1);
+		lcd.print(infMode);
 		flashBackLight(RED, WHITE, 1000);
 
 		do {
@@ -590,7 +645,9 @@ void freePlay() {
 		break;
 
 	case 3:
-		lcd.print(F("Big Brain"));
+		lcd.print(difficulties[3]);
+		lcd.setCursor(0, 1);
+		lcd.print(infMode);
 		flashBackLight(VIOLET, WHITE, 1000);
 
 		do {
@@ -598,8 +655,6 @@ void freePlay() {
 		} while (startGame(seq, 5, 500, 1000));
 		break;
 	}
-
-	// TODO: Highscore, name entry
 }
 
 /**
@@ -648,12 +703,12 @@ void story() {
 	}
 	
 	for (uint8_t stage = 1; stage <= 5; stage++) {
-		//messageBox(diaList[stage - 1], 16);
 
 		// Prints stage progress
 		lcd.clear();
+		lcd.setCursor(3, 0);
 		lcd.print(F("STAGE   /5"));
-		lcd.setCursor(7, 0);
+		lcd.setCursor(10, 0);
 		lcd.print(stage);
 		
 		delay(2000);
@@ -662,20 +717,17 @@ void story() {
 			for (uint8_t round = 1; round <= 3; round++) {
 				// prints level/round progress
 				lcd.clear();
+				lcd.setCursor(3, 0);
 				lcd.print(F("LEVEL   -"));
-				lcd.setCursor(7, 0);
+				lcd.setCursor(10, 0);
 				lcd.print(level);
-				lcd.setCursor(9, 0);
+				lcd.setCursor(12, 0);
 				lcd.print(round);
 
 				delay(2000);
 
 				if (!startGame(seqLength, charsUsed, d, t)) {
-					// game over message
-					lcd.clear();
-					delay(500);		// flicker workaround
-					lcd.print(F("Game Over"));
-					flashBackLight(RED, WHITE, 5000);
+					// Game Over, return to menu
 					return;
 				}
 			}
@@ -693,7 +745,26 @@ void story() {
 	}
 }
 
+/**
+Starts one game with specified parameters
+@param [uint8_t] seqlength - length of sequence
+@param [uint8_t] charsUsed - no. of chars to be used
+@param [short] d - peek time
+@param [short] t - time for each button press
+@return [bool] - win or lose
+*/
 bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
+
+	// Prints parameters to Serial Monitor
+	Serial.print(F("Param: N="));
+	Serial.print(seqLength);
+	Serial.print(F(" chars, M="));
+	Serial.print(charsUsed);
+	Serial.print(F(" chars, D="));
+	Serial.print(d);
+	Serial.print(F(" ms, t="));
+	Serial.print(t);
+	Serial.println(F(" ms."));
 
 	randomSeed(analogRead(0));
 
@@ -720,12 +791,13 @@ bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
 
 	lcd.clear();
 	makeChar();
-	lcd.print(F("Get Ready"));
+	lcd.setCursor(2, 0);
+	lcd.print(F("Get Ready..."));
 
 	delay(1000);
 
-	lcd.setCursor(0, 1);
-	lcd.print(F("GO!"));
+	lcd.setCursor(6, 1);
+	lcd.print(F("GO!!"));
 
 	delay(500);
 
@@ -741,8 +813,11 @@ bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
 	while (k < seqLength) {
 		if (millis() > time) {			// Run out of time
 			lcd.clear();
+			lcd.setCursor(3, 0);
 			lcd.print(F("Time's Up!"));
-			flashBackLight(VIOLET, WHITE, 1000);
+			lcd.setCursor(3, 1);
+			lcd.print(F("Game Over!"));
+			flashBackLight(VIOLET, WHITE, 3000);
 			return false;
 		}
 		else if (lcd.readButtons() == sequence[k]) {	// Pressed the right button
@@ -762,13 +837,16 @@ bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
 			&& lcd.readButtons() != sequence[k]) {	// Press wrong button
 
 			lcd.clear();
-			lcd.print(F("Oops!"));
-			flashBackLight(RED, WHITE, 1000);
+			lcd.setCursor(4, 0);
+			lcd.print(F("Aw Heck!"));
+			lcd.setCursor(3, 1);
+			lcd.print(F("Game Over!"));
+			flashBackLight(RED, WHITE, 3000);
 			return false;
 		}
 
 		// Polls to update timer
-		if (millis() - prevTime > 250) {
+		if (millis() - prevTime > 100) {
 			long timeLeft = time - millis();
 			prevTime = millis();
 
@@ -789,6 +867,7 @@ bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
 	}
 
 	lcd.clear();
+	lcd.setCursor(3, 0);
 	lcd.print(F("Well Done!"));
 	flashBackLight(TEAL, WHITE, 1000);
 	return true;
