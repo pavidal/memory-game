@@ -1,0 +1,214 @@
+# INS: Instructions
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Please use Adafruit Library v1.01 NOT v1.03 as I had trouble                 !
+! with the compiler not being able to find the header file.                    !
+! This may not happen but the header file's path is different so               !
+! it needs to be changed if v1.03 is to be used.                               !
+!                                                                              !
+! This was only tested with v1.01 only                                         !
+!                                                                              !
+! Serial baud rate must be set to 115200                                       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+The symbols represents arrows (↑, ↓, →, ←) and [!] represents select.
+
+Pressing ! at the splash screen enters the main menu. For all types
+of menus, pressing → or ← moves between options. ! selects the current
+option.
+
+While in a message box (e.g. tutorial) pressing ! or → will show
+the next message.
+
+All parameters (N, M, D, T) can be changed with the difficulty presets.
+Each game, all parameter values are printed in serial monitor.
+
+Practice mode is named "Free Play".
+
+# MFS: Features of the minimal feature set
+
+Indicate by deleting YES or NO to the questions below.
+If partially implemented, describe this by deleting *YES/NO* and
+writing what does work.  Do not adjust any other text in this section.
+
+* Sequences are displayed on the screen as specified: *YES*
+* Backlight flashes (only when correct): *YES*
+* Incorrect answer leads to game over: *YES*
+* Successive stages get more difficult: *YES*
+* Game supports *N* up to 10: *YES*
+* Game supports *M* of size 4: *YES*
+* A menu is present: *YES*
+* Size of *M* can be changed: *YES*
+* *N* can be changed: *YES*
+* Message when wrong printed: *YES*
+
+# OAF: Optional and additional features
+
+* Handling sequences N that are longer than 10.
+    * Sequences are held in an uint_8 array of 16 characters.
+    * Each element in the array is randomly generated within
+      a range of M.
+    * Implementation uses N up to 14 chars
+    * No limitations discovered.
+
+* A time limit T for inputting the next character.
+  If a typing in takes longer than T,the user fails.
+
+* Displaying T as a countdown
+    * countdown is shown as a bar of 4 sections
+        * e.g. "TIME: ####", "TIME: ##--"
+        * Displayed at the bottom-right of LCD
+
+* A story mode to build up though increasing N and M and reducing D.
+
+* A menu to switch from practice mode to story mode.
+    * This is the Main Menu
+
+* Selectable difficulty levels that set the the start values for
+  M, N, D and T in story mode.
+    * This is also present in practice "Free Play" mode.
+
+* When displaying the characters to remember define your own
+  graphical representation.
+    * The symbols represents arrows (↑, ↓, →, ←) and [!] represents select.
+
+* Define additional characters so you can use a matrix of 2x2
+  display characters to display a bigger symbol.
+    * This is done with a "banking system" due to the shield's limitations.
+
+* Suitable displays for winning and losing.
+
+* Free Play has preset difficulty levels
+
+* Parameters are randomised in a small range in Free Play mode
+  to simulate playing in story mode
+
+* Short tutorial message accessible by the main menu.
+
+* Game implements M of up to 5.
+    * 5th M is [!] Select
+
+# TPL: Test plan
+
+* Splash screen
+    1. Press SELECT
+    2. Backlight flashes green
+    3. Screen clears
+    4. Main Menu appears
+
+* Main Menu
+    1. Press → OR ←
+        * Selection changes
+        * Options in the menu are as ordered:
+            1. Story Mode
+            2. Free Play
+            3. Tutorial
+        * There is no wrapping
+    2. Press SELECT
+        * Selects the option currently displayed
+        * Backlight flashes green
+        * Screen clears
+
+* Tutorial
+    1. First two lines of the tutorial message appears
+    2. Press → OR SELECT
+    3. The next two lines appears
+    4. Repeat step two until the final two lines
+    5. Message ended, returns to Main Menu
+
+* Free Play
+    1. Difficulty selection menu appears
+        * Navigation is the same with Main Menu
+        * Options are as ordered:
+            1. Easy
+                * BL: Green
+                * N = 3-5, M = 2-3, D = 1s, T = 2.5s
+            2. Normal
+                * BL: Yellow
+                * N = 5-7, M = 3-4, D = 1s, T = 1.5s
+            3. Hard
+                * BL: Red
+                * N = 7-10, M = 4-5, D = 0.75s, T = 1.25s
+            4. Big Brain
+                * BL: Violet
+                * N = 10-14, M = 5, D = 0.5s, T = 1s
+    2. Select difficulty
+    3. Backlight flashes with the corresponding colour (shown above).
+    4. Message printed:
+        * "[DIFFICULTY CHOSEN]
+          Infinite Mode"
+    5. A game is started with the corresponding parameters (shown above)
+    6. Step 5 is repeated until the player loses
+    7. Return to Main Menu
+
+* Story Mode
+
+    Note: There are 5 stages with 8 levels each. One level has 3 rounds.
+
+    1. Difficulty selection menu appears
+        * Navigation is the same with Main Menu
+        * Options are as ordered:
+            1. Easy
+                * BL: Green
+                * N = 3 (Max = 6), M = 2, D = 1s, T = 2.5s
+            2. Normal
+                * BL: Yellow
+                * N = 5 (Max = 8), M = 3, D = 1s, T = 1.5s
+            3. Hard
+                * BL: Red
+                * N = 7 (Max = 10), M = 4, D = 0.75s, T = 1.25s
+            4. Big Brain
+                * BL: Violet
+                * N = 9 (Max = 14), M = 5, D = 0.5s, T = 1s
+    2. Select difficulty
+    3. Backlight flashes with the corresponding colour (shown above).
+
+    4. Prints: "Stage [CURRENT STAGE]/5"
+    5. Backlight Flashes
+    6. Prints: "Level [CURRENT LEVEL] - [CURRENT ROUND]"
+    7. Game starts with current parameters
+    8. Increment round if the player won and continue
+        * If a player fails a round, return to Main Menu.
+    9. Repeat from step 6 twice (3 rounds).
+
+    10. Increment level
+    11. If level number is even, N is incremented.
+    12. Increase level, repeat from step 6 seven more times (8 levels).
+
+    13. Increment M (Maximum is 5)
+    14. Subtract d by 50ms (Minimum is 500ms)
+    15. Reset N to base value
+    16. Increase stage, repeat from step 4 four more times (5 stages).
+
+    17. Backlight flashes Teal
+    18. Print: "You did it! The
+                world's saved..."
+    19. Print: "Or something..."
+    20. Return to Main Menu.
+
+* Gameplay
+
+    Note: By design, this represents one round only.
+
+    1. Parameters are printed to Serial monitor
+    2. Sequence of length N is generated with up to M characters
+    3. Sequence is displayed one-by-one for D milliseconds
+    4. Print: "Get ready...
+               GO!!"
+    5. Timer bar is shown on bottom-right of LCD
+    6. Timer decreases in quarters (polled every 100ms)
+    7. If time since last correct is greater than T, the game ends.
+        1. Backlight flashes violet
+        2. Prints: "Time's up!
+                   Game Over!"
+    8. If player presses an incorrect button, the game ends.
+        1. Backlight flashes red
+        2. Prints: "Aw Heck!
+                   Game Over!"
+    9. If the player presses the correct button
+        1. Backlight flashes green
+        2. Move on to the next character in sequence
+        3. Timer resets
+    10. Once the player completes the sequence correctly
+        1. Backlight flashes teal
+        2. Prints: "Well done!"
