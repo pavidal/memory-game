@@ -1,6 +1,6 @@
 #include <Wire.h>
-#include <Adafruit_MCP23017.h>
 #include <Adafruit_RGBLCDShield.h>
+#include <utility/Adafruit_MCP23017.h>
 //#include <EEPROM.h>
 
 // Custom characters
@@ -901,7 +901,7 @@ bool startGame(uint8_t seqLength, uint8_t charsUsed, short d, short t) {
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(9600);
     lcd.begin(16, 2);
     splash();
 }
