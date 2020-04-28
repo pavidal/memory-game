@@ -10,4 +10,4 @@ It features a "Free Play" infinite mode for practise and a "Story Mode" which pr
 | Library                         | Version |
 |---------------------------------|---------|
 | Adafruit Circuit Playground     | 1.10.4  |
-| Adafruit RGB LCD Shield Library | 1.01    |
+| Adafruit RGB LCD Shield Library | 1.03    |
