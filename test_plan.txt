@@ -1,14 +1,7 @@
 # INS: Instructions
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Please use Adafruit Library v1.01 NOT v1.03 as I had trouble                 !
-! with the compiler not being able to find the header file.                    !
-! This may not happen but the header file's path is different so               !
-! it needs to be changed if v1.03 is to be used.                               !
-!                                                                              !
-! This was only tested with v1.01 only                                         !
-!                                                                              !
-! Serial baud rate must be set to 115200                                       !
+! Serial baud rate must be set to 9600                                         !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 The symbols represents arrows (↑, ↓, →, ←) and [!] represents select.
@@ -23,7 +16,7 @@ the next message.
 All parameters (N, M, D, T) can be changed with the difficulty presets.
 Each game, all parameter values are printed in serial monitor.
 
-Practice mode is named "Free Play".
+Practise mode is named "Free Play".
 
 # MFS: Features of the minimal feature set
 
@@ -49,7 +42,7 @@ writing what does work.  Do not adjust any other text in this section.
     * Each element in the array is randomly generated within
       a range of M.
     * Implementation uses N up to 14 chars
-    * No limitations discovered.
+    * Limited to 16 characters as it is the number of columns
 
 * A time limit T for inputting the next character.
   If a typing in takes longer than T,the user fails.
