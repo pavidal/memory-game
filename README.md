@@ -1,6 +1,6 @@
 # Big Brain Game
-This is a memory game I've made for the Arduino Uno as my Embedded Systems coursework.
-It features a "Free Play" infinite mode for practise and a "Story Mode" which progressively gets more difficult.
+This is a memory game I've made for the Arduino Uno and Adafruit 16x2 LCD Shield Kit.
+It features a "Free Play" infinite mode and a "Story Mode" which progressively gets more difficult.
 
 ## Pictures
 ![Splash Screen](img/splash.jpg)
